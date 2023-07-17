@@ -22,6 +22,6 @@ jobs:
           python train.py
           
           echo "MODEL METRICS"
-          type metrics.txt
+          cat metrics.txt
           
           
