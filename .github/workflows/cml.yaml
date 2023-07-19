@@ -5,21 +5,24 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Docker
-        uses: docker/setup-docker@v2
-      - name: Build Docker image
-        run: docker build -t cml-py3 .
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
       - name: Install dependencies
         run: |
-          docker run --rm -v $PWD:/app -w /app cml-py3 pip install -r requirements.txt
+          pip install -r requirements.txt
       - name: Train model
         run: |
-          docker run --rm -v $PWD:/app -w /app cml-py3 python train.py
+          python train.py
+      - name: Install cml-publish
+        run: |
+          pip install cml-publish
       - name: Generate report
         run: |
-          echo "## Model metrics" > report.md
+          echo "## model metrics" > report.md
           type metrics.txt >> report.md
-          echo "## Data viz" >> report.md
-          docker run --rm -v $PWD:/app -w /app cml-py3 cml-publish feature_importance.png --md >> report.md
-          docker run --rm -v $PWD:/app -w /app cml-py3 cml-publish residuals.png --md >> report.md
-          docker run --rm -v $PWD:/app -w /app cml-py3 cml-send-comment report.md
+          echo "## Data Viz" >> report.md
+          cml-publish feature_importance.png --md >> report.md
+          cml-publish residuals.png --md >> report.md
+          cml-send-comment report.md
