@@ -15,6 +15,12 @@ jobs:
       - name: Train model
         run: |
           python train.py
-      - name: Display model metrics
+      - name: Display "## model metrics" > report.md
         run: |
-          type metrics.txt
+          type metrics.txt >> report.md
+          
+          Display "## Data Viz" >> report.md
+          cml-publish feature_importance.png --md >> report.md
+          cml-publish residuals.png --md >> report.md
+          
+          cnl-send-comment report.md
