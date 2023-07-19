@@ -1,4 +1,4 @@
-name: model-wine-quality
+name: your-workflow-name
 on: [push]
 jobs:
   run:
@@ -23,6 +23,6 @@ jobs:
           echo "## model metrics" > report.md
           type metrics.txt >> report.md
           echo "## Data Viz" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          cml-publish residuals.png --md >> report.md
-          cml-send-comment report.md
+          & python -m cml.publish feature_importance.png --md >> report.md
+          & python -m cml.publish residuals.png --md >> report.md
+          & python -m cml.send_comment report.md
