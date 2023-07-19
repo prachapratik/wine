@@ -15,6 +15,9 @@ jobs:
       - name: Train model
         run: |
           python train.py
+      - name: Install cml-publish
+        run: |
+          pip install cml-publish
       - name: Generate report
         run: |
           echo "## model metrics" > report.md
