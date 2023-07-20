@@ -2,26 +2,31 @@ name: model-wine-quality
 on: [push]
 jobs:
   run:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Use a Windows-based runner
+    container: mcr.microsoft.com/windows/nanoserver:1809  # Use a Windows container image
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: Install dependencies
+      - uses: actions/checkout@v2
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Your ML workflow goes here
+
+          # Install Python and other dependencies (if not already present in the container)
+          choco install python --version 3.9.7 -y
+          refreshenv  # Refresh environment variables to use the newly installed Python
+
           pip install -r requirements.txt
-          pip install cml-publish  # Install cml-publish on Windows
-      - name: Train model
-        run: |
           python train.py
-      - name: Generate report
-        run: |
-          echo "## model metrics" > report.md
+
+          # Write model metrics to report.md
+          echo "## Model metrics" > report.md
           type metrics.txt >> report.md
-          echo "## Data Viz" >> report.md
-          # Use cml-publish directly on Windows
+
+          # Publish data viz images to report.md
+          echo "## Data viz" >> report.md
           cml-publish feature_importance.png --md >> report.md
           cml-publish residuals.png --md >> report.md
+
+          # Send comment with the report.md contents
           cml-send-comment report.md
