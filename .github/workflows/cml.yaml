@@ -2,17 +2,13 @@ name: model-wine-quality
 on: [push]
 jobs:
   run:
-    runs-on: windows-latest  # Use a Windows-based runner
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-      - name: Install DVC (if not already present)
-        run: |
-          pip install dvc
-          dvc --version || echo 'DVC is not installed.'
       - name: Install other dependencies
         run: pip install -r requirements.txt
       - name: Train model
@@ -29,6 +25,34 @@ jobs:
           # Add additional Windows-specific commands here if needed
           # For example, you can use PowerShell scripts or other Windows utilities.
       - name: Send comment with report
+        run: echo 'CML commands are not supported on Windows. Skipping...'  # Use this step to skip CML commands on Windows
+
+  cml-check:
+    runs-on: ${{ matrix.system }}
+    strategy:
+      matrix:
+        system:
+          - ubuntu-latest
+          - macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install other dependencies
+        run: pip install -r requirements.txt
+      - name: Train model
+        run: python train.py
+      - name: Generate report
+        run: |
+          echo "## Model metrics" > report.md
+          cat metrics.txt >> report.md
+          echo "## Data viz" >> report.md
+          cml-publish feature_importance.png --md >> report.md
+          cml-publish residuals.png --md >> report.md
+      - name: Send comment with report
+        if: matrix.system != 'windows-latest'
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
